@@ -1,6 +1,9 @@
 package com.image.login.tomcat;
 
+import com.megvii.cloud.http.CommonOperate;
+import com.megvii.cloud.http.Response;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +24,23 @@ import java.util.Random;
  * Created by ejaiwng on 3/2/2018.
  */
 public class FaceTest {
+
+    @Test
+    public void testCompare() throws Exception {
+        File file1 = new File("E:\\ejaiwng\\Tmp\\image-login\\src\\main\\resources\\jinhai-1.jpg");
+        byte[] buff1 = getBytesFromFile(file1);
+
+        File file2 = new File("E:\\ejaiwng\\Tmp\\image-login\\src\\main\\resources\\jinhai-2.jpg");
+        byte[] buff2 = getBytesFromFile(file2);
+
+        CommonOperate operate = new CommonOperate("43q_Tq75C8wVaaPK4zRlRpy7Y7uykzuL", "Sa6DxOjlxBZMnMv9ZBEpkWYS3BC8f67Q", true);
+        Response response = operate.detectByte(buff1, 0, "");
+        if (response.getStatus() == HttpStatus.OK.value()) {
+            System.out.println(new String(response.getContent()));
+        } else {
+            System.out.println(new StringBuilder().append("{'status':").append(response.getStatus()).append("}").toString());
+        }
+    }
 
     @Test
     public void testFace() throws Exception{

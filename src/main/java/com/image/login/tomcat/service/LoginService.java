@@ -16,46 +16,68 @@
 
 package com.image.login.tomcat.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.image.login.tomcat.model.LoginResult;
 import com.megvii.cloud.http.CommonOperate;
 import com.megvii.cloud.http.Response;
-import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-
-@Component
+@Service
 public class LoginService {
 
-	@Value("${name:World}")
-	private String name;
+    private static final String CONFIDENCE = "confidence";
+    private static final String TIME_USED = "time_used";
+    private static final String ERROR_MESSAGE = "error_message";
 
-	public String getHelloMessage() {
-        CommonOperate commonOperate = new CommonOperate("43q_Tq75C8wVaaPK4zRlRpy7Y7uykzuL", "Sa6DxOjlxBZMnMv9ZBEpkWYS3BC8f67Q", false);
+    @Value("${image.login.match.pass.threshold:80}")
+    private int matchPassThreshold;
 
-        byte[] image1 = readImage("haolin-1.jpg");
-        byte[] image2 = readImage("haolin-1.jpg");
+    @Autowired
+    private ImageRepositoryService imageRepositoryService;
+
+    @Autowired
+    private CommonOperate commonOperate;
+
+    private ObjectMapper mapper = new ObjectMapper();
+
+	public LoginResult compareImage(byte[] imageToBeCheck, String userId) {
+
+        byte[] srcImage = imageRepositoryService.getImage(userId);
+
         try {
-//            Response response = commonOperate.compare(null, null, image1, null, null, null, image2, null);
-            Response response = commonOperate.detectByte(image1, 0, "");
-            if (response.getStatus() != HttpStatus.OK.value()) {
-                return new String(response.getContent());
+            Response response = commonOperate.compare(null, null, imageToBeCheck, null, null, null, srcImage, null);
+
+            if (response.getContent() != null && response.getContent().length > 1) {
+                JsonNode contentNode = mapper.readTree(response.getContent());
+                return buildLoginResultFrom(response.getStatus(), contentNode);
             } else {
-                return new StringBuilder().append("{'status':").append(response.getStatus()).append("}").toString();
+                throw new RuntimeException("Image compare content is empty!");
             }
+
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+
 	}
 
+    private LoginResult buildLoginResultFrom(int status, JsonNode contentNode) {
+        LoginResult loginResult = new LoginResult();
+        loginResult.setStatusCode(status);
+        loginResult.setMatchThreshold(matchPassThreshold);
+        loginResult.setTimeUsed(contentNode.get(TIME_USED).asInt());
 
-	public byte[] readImage(String filePath) {
-        try {
-            return IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(filePath));
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+        if (status == HttpStatus.OK.value()) {
+            loginResult.setMatch(contentNode.get(CONFIDENCE).asDouble());
+            loginResult.setPass(contentNode.get(CONFIDENCE).asDouble() > matchPassThreshold);
+        } else {
+            loginResult.setPass(false);
+            loginResult.setErrorMessage(contentNode.get(ERROR_MESSAGE).asText());
         }
+        return loginResult;
     }
 
 }

@@ -16,11 +16,19 @@
 
 package com.image.login.tomcat.web;
 
+import com.image.login.tomcat.model.LoginResult;
 import com.image.login.tomcat.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 public class LoginController {
@@ -28,10 +36,16 @@ public class LoginController {
 	@Autowired
 	private LoginService loginService;
 
-	@RequestMapping("/login")
-	@ResponseBody
-	public String login() {
-		return this.loginService.getHelloMessage();
+	@RequestMapping(value = "/login/{userId}", method = RequestMethod.POST)
+	public ResponseEntity<LoginResult> login(@PathVariable String userId, @RequestParam("image") MultipartFile image) throws IOException {
+        if (image.isEmpty()) {
+            LoginResult loginResult = new LoginResult();
+            loginResult.setErrorMessage("image was empty");
+            return new ResponseEntity<>(loginResult, HttpStatus.BAD_REQUEST);
+        }
+
+        LoginResult loginResult = loginService.compareImage(image.getBytes(), userId);
+        return new ResponseEntity<>(loginResult, HttpStatus.valueOf(loginResult.getStatusCode()));
 	}
 
 }

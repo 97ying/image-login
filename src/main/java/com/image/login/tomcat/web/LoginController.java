@@ -17,6 +17,7 @@
 package com.image.login.tomcat.web;
 
 import com.image.login.tomcat.model.LoginResult;
+import com.image.login.tomcat.model.Result;
 import com.image.login.tomcat.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ public class LoginController {
 	@Autowired
 	private LoginService loginService;
 
-	@RequestMapping(value = "/login/{userId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/login/{userId}/", method = RequestMethod.POST)
 	public ResponseEntity<LoginResult> login(@PathVariable String userId, @RequestParam("image") MultipartFile image) throws IOException {
         if (image.isEmpty()) {
             LoginResult loginResult = new LoginResult();
@@ -48,4 +49,15 @@ public class LoginController {
         return new ResponseEntity<>(loginResult, HttpStatus.valueOf(loginResult.getStatusCode()));
 	}
 
+    @RequestMapping(value = "image/{userId}/", method = RequestMethod.POST)
+    public ResponseEntity<Result> insertImage(@PathVariable String userId, @RequestParam("image") MultipartFile image) throws IOException {
+        if (image.isEmpty()) {
+            Result result = new Result();
+            result.setErrorMessage("image was empty");
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+        }
+
+        Result result = loginService.saveImage(image.getBytes(), userId);
+        return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatusCode()));
+    }
 }

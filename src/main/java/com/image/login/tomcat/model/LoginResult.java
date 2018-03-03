@@ -3,22 +3,12 @@ package com.image.login.tomcat.model;
 /**
  * Created by ejaiwng on 3/2/2018.
  */
-public class LoginResult {
+public class LoginResult extends Result{
 
-    private int statusCode;
     private long timeUsed;
     private double match;
     private int matchThreshold;
     private boolean pass;
-    private String errorMessage;
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
 
     public long getTimeUsed() {
         return timeUsed;
@@ -52,11 +42,5 @@ public class LoginResult {
         this.pass = pass;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
 }

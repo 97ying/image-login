@@ -19,6 +19,7 @@ package com.image.login.tomcat.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.image.login.tomcat.model.LoginResult;
+import com.image.login.tomcat.model.Result;
 import com.megvii.cloud.http.CommonOperate;
 import com.megvii.cloud.http.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +45,27 @@ public class LoginService {
 
     private ObjectMapper mapper = new ObjectMapper();
 
+    public Result saveImage(byte[] image, String userId) {
+        Result result = new Result();
+        if (imageRepositoryService.saveImage(userId, image)) {
+            result.setStatusCode(HttpStatus.OK.value());
+        } else {
+            result.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            result.setErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        }
+        return result;
+    }
+
 	public LoginResult compareImage(byte[] imageToBeCheck, String userId) {
 
         byte[] srcImage = imageRepositoryService.getImage(userId);
+
+        if (srcImage == null) {
+            LoginResult loginResult = new LoginResult();
+            loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            loginResult.setErrorMessage("user not found");
+            return loginResult;
+        }
 
         try {
             Response response = commonOperate.compare(null, null, imageToBeCheck, null, null, null, srcImage, null);
@@ -72,7 +91,12 @@ public class LoginService {
 
         if (status == HttpStatus.OK.value()) {
             loginResult.setMatch(contentNode.get(CONFIDENCE).asDouble());
-            loginResult.setPass(contentNode.get(CONFIDENCE).asDouble() > matchPassThreshold);
+            if (contentNode.get(CONFIDENCE).asDouble() > matchPassThreshold) {
+                loginResult.setPass(true);
+            } else {
+                loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            }
+
         } else {
             loginResult.setPass(false);
             loginResult.setErrorMessage(contentNode.get(ERROR_MESSAGE).asText());

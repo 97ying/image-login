@@ -1,4 +1,4 @@
-package com.image.login.tomcat.model;
+package com.demo.image.login.model;
 
 public class Result {
 

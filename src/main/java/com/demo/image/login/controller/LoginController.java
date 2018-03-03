@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.image.login.tomcat.web;
+package com.demo.image.login.controller;
 
-import com.image.login.tomcat.model.LoginResult;
-import com.image.login.tomcat.model.Result;
-import com.image.login.tomcat.service.LoginService;
+import com.demo.image.login.model.LoginResult;
+import com.demo.image.login.model.Result;
+import com.demo.image.login.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

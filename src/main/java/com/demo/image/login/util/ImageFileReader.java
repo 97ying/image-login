@@ -1,4 +1,4 @@
-package com.image.login.tomcat.util;
+package com.demo.image.login.util;
 
 import org.apache.commons.io.IOUtils;
 

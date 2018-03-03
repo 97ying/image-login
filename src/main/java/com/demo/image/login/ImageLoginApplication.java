@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.image.login.tomcat;
+package com.demo.image.login;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.image.login.tomcat.service;
+package com.demo.image.login.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.image.login.tomcat.model.LoginResult;
-import com.image.login.tomcat.model.Result;
+import com.demo.image.login.model.LoginResult;
+import com.demo.image.login.model.Result;
 import com.megvii.cloud.http.CommonOperate;
 import com.megvii.cloud.http.Response;
 import org.springframework.beans.factory.annotation.Autowired;

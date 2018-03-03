@@ -1,6 +1,6 @@
-package com.image.login.tomcat.service;
+package com.demo.image.login.service;
 
-import com.image.login.tomcat.model.Image;
+import com.demo.image.login.model.Image;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

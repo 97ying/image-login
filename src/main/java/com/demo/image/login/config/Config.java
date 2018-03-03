@@ -1,4 +1,4 @@
-package com.image.login.tomcat.config;
+package com.demo.image.login.config;
 
 import com.megvii.cloud.http.CommonOperate;
 import org.springframework.beans.factory.annotation.Value;

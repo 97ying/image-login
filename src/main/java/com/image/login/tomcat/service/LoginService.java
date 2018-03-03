@@ -56,7 +56,7 @@ public class LoginService {
         return result;
     }
 
-	public LoginResult compareImage(byte[] imageToBeCheck, String userId) {
+    public LoginResult compareImage(byte[] imageToBeCheck, String userId) {
 
         byte[] srcImage = imageRepositoryService.getImage(userId);
 
@@ -81,7 +81,7 @@ public class LoginService {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-	}
+    }
 
     private LoginResult buildLoginResultFrom(int status, JsonNode contentNode) {
         LoginResult loginResult = new LoginResult();

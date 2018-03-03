@@ -3,7 +3,7 @@ package com.megvii.cloud.http;
 /**
  * HTTP 请求的结果，包含返回的状态码和返回内容
  * result of HTTP request, includ status code and result content
- *
+ * <p>
  * Created by Qi Wang on 2016/12/19.
  */
 public class Response {
@@ -12,11 +12,11 @@ public class Response {
     private int status;//返回的状态码 status code
 
 
-    public Response(){
+    public Response() {
 
     }
 
-    public Response(byte[] content, int status){
+    public Response(byte[] content, int status) {
         this.content = content;
         this.status = status;
     }

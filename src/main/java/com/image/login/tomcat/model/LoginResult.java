@@ -3,7 +3,7 @@ package com.image.login.tomcat.model;
 /**
  * Created by ejaiwng on 3/2/2018.
  */
-public class LoginResult extends Result{
+public class LoginResult extends Result {
 
     private long timeUsed;
     private double match;

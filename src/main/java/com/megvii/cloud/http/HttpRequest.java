@@ -24,6 +24,7 @@ public class HttpRequest {
     /**
      * 网络请求方法
      * function of http request by post
+     *
      * @param url
      * @param map
      * @param fileMap
@@ -45,7 +46,7 @@ public class HttpRequest {
         conne.setRequestProperty("user-agent", "Mozilla/4.0 (compatible;MSIE 6.0;Windows NT 5.1;SV1)");
         DataOutputStream obos = new DataOutputStream(conne.getOutputStream());
         Iterator iter = map.entrySet().iterator();
-        while(iter.hasNext()){
+        while (iter.hasNext()) {
             Map.Entry<String, String> entry = (Map.Entry) iter.next();
             String key = entry.getKey();
             String value = entry.getValue();
@@ -55,9 +56,9 @@ public class HttpRequest {
             obos.writeBytes("\r\n");
             obos.writeBytes(value + "\r\n");
         }
-        if(fileMap != null && fileMap.size() > 0){
+        if (fileMap != null && fileMap.size() > 0) {
             Iterator fileIter = fileMap.entrySet().iterator();
-            while(fileIter.hasNext()){
+            while (fileIter.hasNext()) {
                 Map.Entry<String, byte[]> fileEntry = (Map.Entry<String, byte[]>) fileIter.next();
                 obos.writeBytes("--" + boundaryString + "\r\n");
                 obos.writeBytes("Content-Disposition: form-data; name=\"" + fileEntry.getKey()
@@ -74,20 +75,20 @@ public class HttpRequest {
         InputStream ins = null;
 
         int code = conne.getResponseCode();
-        try{
-            if(code == 200){
+        try {
+            if (code == 200) {
                 ins = conne.getInputStream();
-            }else{
+            } else {
                 ins = conne.getErrorStream();
             }
-        }catch (SSLException e){
+        } catch (SSLException e) {
             e.printStackTrace();
             return new Response();
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buff = new byte[4096];
         int len;
-        while((len = ins.read(buff)) != -1){
+        while ((len = ins.read(buff)) != -1) {
             baos.write(buff, 0, len);
         }
         byte[] bytes = baos.toByteArray();
@@ -100,19 +101,19 @@ public class HttpRequest {
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
 
-        for(int i = 0; i < 32; ++i) {
+        for (int i = 0; i < 32; ++i) {
             sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".charAt(random.nextInt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_".length())));
         }
 
         return sb.toString();
     }
 
-    private static String encode(String value) throws Exception{
+    private static String encode(String value) throws Exception {
         return URLEncoder.encode(value, "UTF-8");
     }
 
 
-    public static boolean isEmpty(String str){
+    public static boolean isEmpty(String str) {
         if (str == null || str.length() == 0)
             return true;
         else

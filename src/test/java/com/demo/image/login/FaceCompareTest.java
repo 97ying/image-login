@@ -26,7 +26,7 @@ public class FaceCompareTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void testFaceCompare() throws Exception {
+    public void testFaceCompare() {
         MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         bodyMap.add("image", new FileSystemResource(FaceCompareTest.class.getClassLoader().getResource("jinhai-1.jpg").getPath()));
         HttpHeaders headers = new HttpHeaders();

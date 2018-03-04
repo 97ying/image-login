@@ -56,4 +56,12 @@ public class LoginController {
         Result result = loginService.saveImage(image.getBytes(), userId);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatusCode()));
     }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<Result> handleException(Exception ex) {
+        Result result = new Result();
+        result.setErrorMessage(ex.getMessage());
+        result.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

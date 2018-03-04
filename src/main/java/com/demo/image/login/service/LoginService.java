@@ -16,16 +16,19 @@
 
 package com.demo.image.login.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.demo.image.login.model.Image;
 import com.demo.image.login.model.LoginResult;
 import com.demo.image.login.model.Result;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megvii.cloud.http.CommonOperate;
 import com.megvii.cloud.http.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class LoginService {
@@ -47,7 +50,7 @@ public class LoginService {
 
     public Result saveImage(byte[] image, String userId) {
         Result result = new Result();
-        if (imageRepositoryService.saveImage(userId, image)) {
+        if (imageRepositoryService.saveImage(new Image(userId, image))) {
             result.setStatusCode(HttpStatus.OK.value());
         } else {
             result.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -57,16 +60,12 @@ public class LoginService {
     }
 
     public LoginResult compareImage(byte[] imageToBeCheck, String userId) {
+        return imageRepositoryService.getImage(userId).map(srcImage ->
+                getLoginResult(imageToBeCheck, srcImage.getImage())
+        ).orElse(getUserNotFoundLoginResult());
+    }
 
-        byte[] srcImage = imageRepositoryService.getImage(userId);
-
-        if (srcImage == null) {
-            LoginResult loginResult = new LoginResult();
-            loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-            loginResult.setErrorMessage("user not found");
-            return loginResult;
-        }
-
+    private LoginResult getLoginResult(byte[] imageToBeCheck, byte[] srcImage) {
         try {
             Response response = commonOperate.compare(null, null, imageToBeCheck, null, null, null, srcImage, null);
 
@@ -80,7 +79,13 @@ public class LoginService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
 
+    private LoginResult getUserNotFoundLoginResult() {
+        LoginResult loginResult = new LoginResult();
+        loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        loginResult.setErrorMessage("user not found");
+        return loginResult;
     }
 
     private LoginResult buildLoginResultFrom(int status, JsonNode contentNode) {
@@ -90,8 +95,9 @@ public class LoginService {
         loginResult.setTimeUsed(contentNode.get(TIME_USED).asInt());
 
         if (status == HttpStatus.OK.value()) {
-            loginResult.setMatch(contentNode.get(CONFIDENCE).asDouble());
-            if (contentNode.get(CONFIDENCE).asDouble() > matchPassThreshold) {
+            double match = Optional.ofNullable(contentNode.get(CONFIDENCE)).map(n -> n.asDouble()).orElse(0.0);
+            loginResult.setMatch(match);
+            if (match > matchPassThreshold) {
                 loginResult.setPass(true);
             } else {
                 loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());

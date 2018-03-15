@@ -19,6 +19,10 @@ package com.demo.image.login.controller;
 import com.demo.image.login.model.LoginResult;
 import com.demo.image.login.model.Result;
 import com.demo.image.login.service.LoginService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,23 +34,31 @@ import java.io.IOException;
 @RestController
 public class LoginController {
 
+    private Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     private LoginService loginService;
 
     @RequestMapping(value = "/login/{userId}/", method = RequestMethod.POST)
     public ResponseEntity<LoginResult> login(@PathVariable String userId, @RequestParam("image") MultipartFile image) throws IOException {
+        LOGGER.info("received login request for user: {}", userId);
         if (image.isEmpty()) {
             LoginResult loginResult = new LoginResult();
             loginResult.setErrorMessage("image was empty");
+            LOGGER.info(objectMapper.writeValueAsString(loginResult));
             return new ResponseEntity<>(loginResult, HttpStatus.BAD_REQUEST);
         }
 
         LoginResult loginResult = loginService.compareImage(image.getBytes(), userId);
+        LOGGER.info(objectMapper.writeValueAsString(loginResult));
         return new ResponseEntity<>(loginResult, HttpStatus.valueOf(loginResult.getStatusCode()));
     }
 
     @RequestMapping(value = "image/{userId}/", method = RequestMethod.POST)
     public ResponseEntity<Result> insertImage(@PathVariable String userId, @RequestParam("image") MultipartFile image) throws IOException {
+        LOGGER.info("received image upload request for user: {}", userId);
         if (image.isEmpty()) {
             Result result = new Result();
             result.setErrorMessage("image was empty");
@@ -54,14 +66,18 @@ public class LoginController {
         }
 
         Result result = loginService.saveImage(image.getBytes(), userId);
+        LOGGER.info(objectMapper.writeValueAsString(result));
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatusCode()));
     }
 
     @ExceptionHandler({Exception.class})
-    public ResponseEntity<Result> handleException(Exception ex) {
+    public ResponseEntity<Result> handleException(Exception ex) throws JsonProcessingException {
+        LOGGER.error(ex.getMessage(), ex);
+
         Result result = new Result();
         result.setErrorMessage(ex.getMessage());
         result.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        LOGGER.info("response: " + objectMapper.writeValueAsString(result));
         return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

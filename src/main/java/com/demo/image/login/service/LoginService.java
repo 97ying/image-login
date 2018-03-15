@@ -100,10 +100,10 @@ public class LoginService {
             if (match > matchPassThreshold) {
                 loginResult.setPass(true);
             } else {
-                loginResult.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+                loginResult.setStatusCode(HttpStatus.OK.value());
             }
-
         } else {
+            loginResult.setStatusCode(HttpStatus.OK.value());
             loginResult.setPass(false);
             loginResult.setErrorMessage(contentNode.get(ERROR_MESSAGE).asText());
         }

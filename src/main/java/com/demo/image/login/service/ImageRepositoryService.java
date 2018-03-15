@@ -23,16 +23,26 @@ public class ImageRepositoryService {
 
     private static final String SELECT_IMAGE_BY_ID = "SELECT name, image from image where name=?;";
     private static final String INSERT_IMAGE = "INSERT INTO image VALUES(?,?);";
+    private static final String UPDATE_IMAGE = "UPDATE image SET image=? where name=?;";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     public Optional<Image> getImage(String userId) {
-        return jdbcTemplate.queryForObject(SELECT_IMAGE_BY_ID, new ImageRowMapper(), userId);
+        try {
+            return jdbcTemplate.queryForObject(SELECT_IMAGE_BY_ID, new ImageRowMapper(), userId);
+        } catch (EmptyResultDataAccessException ex) {
+            logger.warn(ex.getMessage());
+            return Optional.empty();
+        }
     }
 
     public boolean saveImage(Image image) {
-        jdbcTemplate.update(INSERT_IMAGE, image.getName(), image.getImage());
+        if (getImage(image.getName()).isPresent()) {
+            jdbcTemplate.update(UPDATE_IMAGE, image.getImage(), image.getName());
+        } else {
+            jdbcTemplate.update(INSERT_IMAGE, image.getName(), image.getImage());
+        }
         return true;
     }
 
